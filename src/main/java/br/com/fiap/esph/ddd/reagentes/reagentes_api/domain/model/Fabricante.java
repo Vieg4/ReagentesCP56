@@ -1,5 +1,6 @@
 package br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.model;
 
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class Fabricante {
     private String nomeFantasia;
 
     private String cnpj;
-    
+
     private String paisOrigem;
 
     @Builder.Default
