@@ -4,6 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Fabricante {
 
     private UUID id;
@@ -19,12 +24,17 @@ public class Fabricante {
     private List<Reagente> reagentes = new ArrayList<>() ;
 
 
+    public Fabricante(String nomeOficial, String nomeFantasia, String cnpj) {
+        this.nomeOficial = nomeOficial;
+        this.nomeFantasia = nomeFantasia;
+        this.cnpj = cnpj;
+    }
 
     public void adicinarReagente (Reagente reagente) {
-
+        getReagentes().add(reagente);
     }
 
     public void removerReagente (Reagente reagente) {
-
+        getReagentes().remove(reagente);
     }
 }
