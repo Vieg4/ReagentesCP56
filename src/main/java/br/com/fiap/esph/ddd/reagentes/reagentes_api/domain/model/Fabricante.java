@@ -8,26 +8,30 @@ import lombok.Getter;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @EqualsAndHashCode(of = "id")
+@Builder
+
 public class Fabricante {
 
     private UUID id;
 
     private String nomeOficial;
-    
+
     private String nomeFantasia;
 
     private String cnpj;
-
+    
     private String paisOrigem;
 
-    private List<Reagente> reagentes = new ArrayList<>() ;
-
-
+    @Builder.Default
+    private List<Reagente> reagentes = new ArrayList<>();
 
     public Fabricante(String nomeOficial, String nomeFantasia, String cnpj) {
         this.nomeOficial = nomeOficial;
@@ -35,11 +39,19 @@ public class Fabricante {
         this.cnpj = cnpj;
     }
 
-    public void adicinarReagente (Reagente reagente) {
-        getReagentes().add(reagente);
+
+    public void adicionarReagente(Reagente reagente) {
+        if (reagente == null) return;
+
+        reagentes.add(reagente);
+        reagente.setFabricante(this);
     }
 
-    public void removerReagente (Reagente reagente) {
-        getReagentes().remove(reagente);
+
+    public void removerReagente(Reagente reagente) {
+        if (reagente == null) return;
+
+        reagentes.remove(reagente);
+        reagente.setFabricante(null);
     }
 }
