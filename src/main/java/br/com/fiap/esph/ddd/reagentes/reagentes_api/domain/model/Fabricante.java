@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.UUID;
 
 import lombok.Getter;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@EqualsAndHashCode(of = "id")
 public class Fabricante {
 
     private UUID id;
@@ -22,6 +26,7 @@ public class Fabricante {
     private String paisOrigem;
 
     private List<Reagente> reagentes = new ArrayList<>() ;
+
 
 
     public Fabricante(String nomeOficial, String nomeFantasia, String cnpj) {
