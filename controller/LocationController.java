@@ -11,7 +11,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 
-// Importante: Assumimos que o LocationService, LocationDTO e LocationCreationDTO existem.
 @RestController
 @RequestMapping("/api/v1/locations")
 public class LocationController {
@@ -62,4 +61,5 @@ public class LocationController {
         locationService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
 }
