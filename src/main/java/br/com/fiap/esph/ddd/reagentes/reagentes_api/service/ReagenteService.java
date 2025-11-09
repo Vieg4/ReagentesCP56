@@ -3,11 +3,15 @@ package br.com.fiap.esph.ddd.reagentes.reagentes_api.service;
 import br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.dto.ReagenteCreateDTO;
 import br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.dto.ReagenteDTO;
 import br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.model.Fabricante;
+import br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.model.LocalizacaoEstoque;
 import br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.model.Reagente;
+import br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.mapper.ReagenteMapper;
 import br.com.fiap.esph.ddd.reagentes.reagentes_api.repository.FabricanteRepository;
+import br.com.fiap.esph.ddd.reagentes.reagentes_api.repository.LocalizacaoEstoqueRepository;
 import br.com.fiap.esph.ddd.reagentes.reagentes_api.repository.ReagenteRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,18 +21,30 @@ public class ReagenteService {
 
     private final ReagenteRepository reagenteRepository;
     private final FabricanteRepository fabricanteRepository;
+    private final LocalizacaoEstoqueRepository localizacaoEstoqueRepository;
 
-    public ReagenteService(ReagenteRepository reagenteRepository, FabricanteRepository fabricanteRepository) {
+    public ReagenteService(ReagenteRepository reagenteRepository, 
+                          FabricanteRepository fabricanteRepository,
+                          LocalizacaoEstoqueRepository localizacaoEstoqueRepository) {
         this.reagenteRepository = reagenteRepository;
         this.fabricanteRepository = fabricanteRepository;
+        this.localizacaoEstoqueRepository = localizacaoEstoqueRepository;
     }
 
-    // ========================
-    // CRIAR REAGENTE (POST)
-    // ========================
+    @Transactional
     public ReagenteDTO create(ReagenteCreateDTO dto) {
+        // Buscar Fabricante
+        Fabricante fabricante = fabricanteRepository.findById(dto.fabricanteId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Fabricante não encontrado com id: " + dto.fabricanteId()));
+        
+        // Buscar LocalizacaoEstoque
+        LocalizacaoEstoque localizacao = localizacaoEstoqueRepository.findById(dto.localizacaoEstoqueId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Localização de estoque não encontrada com id: " + dto.localizacaoEstoqueId()));
+        
+        // Criar Reagente
         Reagente reagente = new Reagente();
-
         reagente.setNome(dto.nome());
         reagente.setCodigoSku(dto.codigoSku());
         reagente.setLote(dto.lote());
@@ -36,45 +52,47 @@ public class ReagenteService {
         reagente.setDataRecebimento(dto.dataRecebimento());
         reagente.setQuantidadeEmEstoque(dto.quantidadeEmEstoque());
         reagente.setStatus(dto.status());
-
-        if (dto.fabricanteId() != null) {
-            Fabricante fabricante = fabricanteRepository.findById(dto.fabricanteId())
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "Fabricante não encontrado com id: " + dto.fabricanteId()));
-            reagente.setFabricante(fabricante);
-        }
+        reagente.setFabricante(fabricante);
+        reagente.setLocalizacaoEstoque(localizacao);
 
         reagenteRepository.save(reagente);
-        return toDTO(reagente);
+        
+        // Usar Mapper para converter para DTO
+        return ReagenteMapper.toDTO(reagente);
     }
 
-    // ========================
-    // LISTAR TODOS (GET)
-    // ========================
+    @Transactional(readOnly = true)
     public List<ReagenteDTO> findAll() {
         return reagenteRepository.findAll().stream()
-                .map(this::toDTO)
+                .map(ReagenteMapper::toDTO)
                 .toList();
     }
 
-    // ========================
-    // BUSCAR POR ID (GET /{id})
-    // ========================
+    @Transactional(readOnly = true)
     public ReagenteDTO findById(UUID id) {
         Reagente reagente = reagenteRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Reagente não encontrado com id: " + id));
-        return toDTO(reagente);
+        return ReagenteMapper.toDTO(reagente);
     }
 
-    // ========================
-    // ATUALIZAR (PUT /{id})
-    // ========================
+    @Transactional
     public ReagenteDTO update(UUID id, ReagenteCreateDTO dto) {
         Reagente reagente = reagenteRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Reagente não encontrado com id: " + id));
 
+        // Buscar Fabricante
+        Fabricante fabricante = fabricanteRepository.findById(dto.fabricanteId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Fabricante não encontrado com id: " + dto.fabricanteId()));
+        
+        // Buscar LocalizacaoEstoque
+        LocalizacaoEstoque localizacao = localizacaoEstoqueRepository.findById(dto.localizacaoEstoqueId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Localização de estoque não encontrada com id: " + dto.localizacaoEstoqueId()));
+
+        // Atualizar campos
         reagente.setNome(dto.nome());
         reagente.setCodigoSku(dto.codigoSku());
         reagente.setLote(dto.lote());
@@ -82,44 +100,18 @@ public class ReagenteService {
         reagente.setDataRecebimento(dto.dataRecebimento());
         reagente.setQuantidadeEmEstoque(dto.quantidadeEmEstoque());
         reagente.setStatus(dto.status());
-
-        if (dto.fabricanteId() != null) {
-            Fabricante fabricante = fabricanteRepository.findById(dto.fabricanteId())
-                    .orElseThrow(() -> new EntityNotFoundException(
-                            "Fabricante não encontrado com id: " + dto.fabricanteId()));
-            reagente.setFabricante(fabricante);
-        }
+        reagente.setFabricante(fabricante);
+        reagente.setLocalizacaoEstoque(localizacao);
 
         reagenteRepository.save(reagente);
-        return toDTO(reagente);
+        return ReagenteMapper.toDTO(reagente);
     }
 
-    // ========================
-    // DELETAR (DELETE /{id})
-    // ========================
+    @Transactional
     public void delete(UUID id) {
         if (!reagenteRepository.existsById(id)) {
             throw new EntityNotFoundException("Reagente não encontrado com id: " + id);
         }
         reagenteRepository.deleteById(id);
-    }
-
-    // ========================
-    // CONVERSOR PARA DTO
-    // ========================
-    private ReagenteDTO toDTO(Reagente reagente) {
-        return new ReagenteDTO(
-                reagente.getId(),
-                reagente.getNome(),
-                reagente.getCodigoSku(),
-                reagente.getLote(),
-                reagente.getDataValidade(),
-                reagente.getDataRecebimento(),
-                reagente.getQuantidadeEmEstoque(),
-                reagente.getStatus(),
-                reagente.getFabricante() != null
-                        ? reagente.getFabricante().getNomeFantasia()
-                        : null
-        );
     }
 }

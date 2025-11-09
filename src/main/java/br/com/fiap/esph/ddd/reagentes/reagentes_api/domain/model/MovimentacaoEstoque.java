@@ -1,37 +1,38 @@
 package br.com.fiap.esph.ddd.reagentes.reagentes_api.domain.model;
 
-import java.time.LocalDate;
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Builder;
-
+@Entity
+@Table(name = "movimentacoes_estoque")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
 @Builder
-
 public class MovimentacaoEstoque {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(length = 500)
     private String observacao;
 
+    @Column(nullable = false)
     private Integer quantidadeMovimentada;
 
+    @Column(nullable = false)
     private LocalDateTime dataHoraMovimentacao;
 
-    private LocalDate dataPagamento;
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private TipoMovimentacao tipo;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reagente_id", nullable = false)
     private Reagente reagente;
-
 }
